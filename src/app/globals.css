@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-cream: #FEFAE0;
+  --color-navy: #1a1a2e;
+  --color-coral: #FF6B35;
+  --color-yellow: #FFD60A;
+  --color-sage: #8DB48E;
+  --color-white: #ffffff;
+  --color-light-gray: #f0ede0;
+
+  --font-fredoka: var(--font-fredoka);
+  --font-nunito: var(--font-nunito);
+
+  --shadow-cartoon: 4px 4px 0px #1a1a2e;
+  --shadow-cartoon-lg: 6px 6px 0px #1a1a2e;
+  --shadow-cartoon-coral: 4px 4px 0px #FF6B35;
+  --shadow-cartoon-yellow: 4px 4px 0px #FFD60A;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Base styles */
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FEFAE0;
+  color: #1a1a2e;
+}
+
+/* Cartoon card style */
+.card-cartoon {
+  background: #ffffff;
+  border: 2.5px solid #1a1a2e;
+  box-shadow: 4px 4px 0px #1a1a2e;
+  border-radius: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-cartoon:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1a1a2e;
+}
+
+/* Cartoon button */
+.btn-cartoon {
+  border: 2.5px solid #1a1a2e;
+  box-shadow: 4px 4px 0px #1a1a2e;
+  border-radius: 8px;
+  font-family: var(--font-fredoka);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+}
+
+.btn-cartoon:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #1a1a2e;
+}
+
+.btn-cartoon:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1a1a2e;
+}
+
+.btn-coral {
+  background: #FF6B35;
+  color: #ffffff;
+}
+
+.btn-yellow {
+  background: #FFD60A;
+  color: #1a1a2e;
+}
+
+.btn-navy {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+.btn-white {
+  background: #ffffff;
+  color: #1a1a2e;
+}
+
+/* Section heading */
+.section-heading {
+  font-family: var(--font-fredoka);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: #1a1a2e;
+  position: relative;
+  display: inline-block;
+}
+
+.section-heading::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 60%;
+  height: 4px;
+  background: #FF6B35;
+  border-radius: 2px;
+}
+
+/* Input styles */
+.input-cartoon {
+  border: 2.5px solid #1a1a2e;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-family: var(--font-nunito);
+  font-size: 1rem;
+  background: #ffffff;
+  color: #1a1a2e;
+  outline: none;
+  width: 100%;
+  transition: box-shadow 0.15s ease;
+}
+
+.input-cartoon:focus {
+  box-shadow: 3px 3px 0px #FF6B35;
+}
+
+/* Doodle decorations */
+.doodle-star {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Badge */
+.badge-cartoon {
+  display: inline-block;
+  border: 2px solid #1a1a2e;
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-family: var(--font-fredoka);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FEFAE0;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a1a2e;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-wiggle { animation: wiggle 1s ease-in-out infinite; }
+.animate-fade-in-up { animation: fadeInUp 0.5s ease forwards; }
+
+/* Navbar active link */
+.nav-link-active {
+  color: #FF6B35;
+  font-weight: 700;
+  border-bottom: 3px solid #FF6B35;
 }
