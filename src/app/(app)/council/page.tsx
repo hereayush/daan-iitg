@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Phone, Mail, ExternalLink, Star } from "lucide-react";
 import type { Metadata } from "next";
+import PageIntro from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "DAAN Council",
@@ -20,17 +21,12 @@ export default async function CouncilPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h1 className="section-heading">DAAN Council</h1>
-        <p className="font-nunito text-navy/70 mt-4 text-base max-w-xl">
-          Meet the current council members leading the Dakshana Alumni Network at IIT Guwahati.
-        </p>
-      </div>
+      <PageIntro eyebrow="The people behind the work" title="DAAN Council" description="Meet the current council members leading the Dakshana Alumni Network at IIT Guwahati." icon={Star} tone="sage" />
 
       {members && members.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {members.map((m) => (
-            <div key={m.id} className="card-cartoon bg-white overflow-hidden">
+            <article key={m.id} className="card-cartoon group bg-white overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-cartoon-lg">
               {/* Photo */}
               <div className="relative aspect-square w-full bg-yellow border-b-2 border-navy flex items-center justify-center">
                 {m.photo_url ? (
@@ -38,7 +34,7 @@ export default async function CouncilPage() {
                   <img
                     src={m.photo_url}
                     alt={m.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 ) : (
                   <Star size={48} className="text-navy/30" />
@@ -51,7 +47,7 @@ export default async function CouncilPage() {
 
               {/* Info */}
               <div className="p-5">
-                <h3 className="font-fredoka font-700 text-navy text-xl">{m.name}</h3>
+                <h3 className="font-fredoka font-700 text-navy text-xl group-hover:text-coral">{m.name}</h3>
 
                 <div className="flex flex-col gap-2 mt-4">
                   {m.phone && (
@@ -85,7 +81,7 @@ export default async function CouncilPage() {
                   )}
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       ) : (

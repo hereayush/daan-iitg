@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import CalendarClient from "./CalendarClient";
 import type { Metadata } from "next";
+import { CalendarDays } from "lucide-react";
+import PageIntro from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "Academic Calendar",
@@ -28,12 +30,7 @@ export default async function CalendarPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h1 className="section-heading">Academic Calendar</h1>
-        <p className="font-nunito text-navy/70 mt-4 text-base max-w-xl">
-          Holidays, exams, events, and important dates at a glance.
-        </p>
-      </div>
+      <PageIntro eyebrow="Plan the semester" title="Academic Calendar" description="Holidays, exams, events, and important dates at a glance." icon={CalendarDays} tone="sage" />
       <CalendarClient events={calendarEvents || []} isAdmin={isAdmin} />
     </div>
   );

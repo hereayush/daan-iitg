@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
+import PageIntro from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "Achievements",
@@ -20,23 +21,18 @@ export default async function AchievementsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h1 className="section-heading">Achievements</h1>
-        <p className="font-nunito text-navy/70 mt-4 text-base max-w-xl">
-          Celebrating the milestones, victories, and proud moments of Dakshana scholars.
-        </p>
-      </div>
+      <PageIntro eyebrow="The DAAN noticeboard" title="Achievements" description="Celebrating the milestones, victories, and proud moments of Dakshana scholars." icon={Trophy} tone="yellow" />
 
       {achievements && achievements.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {achievements.map((item) => (
-            <div key={item.id} className="card-cartoon bg-white overflow-hidden flex flex-col">
+            <article key={item.id} className="card-cartoon group bg-white overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-cartoon-lg">
               {item.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={item.photo_url}
                   alt={item.title}
-                  className="w-full aspect-video object-cover border-b-2 border-navy"
+                  className="w-full aspect-video object-cover border-b-2 border-navy transition-transform duration-300 group-hover:scale-[1.03]"
                 />
               ) : (
                 <div className="w-full aspect-video bg-yellow border-b-2 border-navy flex items-center justify-center">
@@ -44,7 +40,7 @@ export default async function AchievementsPage() {
                 </div>
               )}
               <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-fredoka font-600 text-navy text-xl">{item.title}</h3>
+                <h3 className="font-fredoka font-600 text-navy text-xl group-hover:text-coral">{item.title}</h3>
                 {item.caption && (
                   <p className="font-nunito font-600 text-coral text-sm mt-1">{item.caption}</p>
                 )}
@@ -61,7 +57,7 @@ export default async function AchievementsPage() {
                   })}
                 </p>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       ) : (

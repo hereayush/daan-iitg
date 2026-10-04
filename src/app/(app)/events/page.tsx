@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Zap, CalendarDays } from "lucide-react";
 import type { Metadata } from "next";
+import PageIntro from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -24,18 +25,13 @@ export default async function EventsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h1 className="section-heading">Events</h1>
-        <p className="font-nunito text-navy/70 mt-4 text-base max-w-xl">
-          Upcoming and past events from the DAAN community.
-        </p>
-      </div>
+      <PageIntro eyebrow="Gather, learn, celebrate" title="Events" description="Upcoming and past gatherings from the DAAN community." icon={Zap} />
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
         <section className="mb-12">
           <h2 className="font-fredoka font-600 text-navy text-xl mb-4 flex items-center gap-2">
-            <Zap size={20} className="text-coral" /> Upcoming Events
+            <span className="grid h-8 w-8 place-items-center rounded-lg border-2 border-navy bg-coral text-white"><Zap size={16} /></span> Upcoming Events
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcoming.map((event) => (
@@ -49,7 +45,7 @@ export default async function EventsPage() {
       {past.length > 0 && (
         <section>
           <h2 className="font-fredoka font-600 text-navy text-xl mb-4 flex items-center gap-2">
-            <CalendarDays size={20} className="text-navy/50" /> Past Events
+            <span className="grid h-8 w-8 place-items-center rounded-lg border-2 border-navy bg-sage"><CalendarDays size={16} /></span> Past Events
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {past.map((event) => (
@@ -72,13 +68,13 @@ export default async function EventsPage() {
 
 function EventCard({ event, highlight }: { event: { id: string; title: string; description: string | null; photo_url: string | null; event_date: string | null; created_at: string }; highlight: boolean }) {
   return (
-    <div className={`card-cartoon overflow-hidden flex flex-col ${highlight ? "bg-white" : "bg-light-gray"}`}>
+    <article className={`card-cartoon group overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-cartoon-lg ${highlight ? "bg-white" : "bg-light-gray"}`}>
       {event.photo_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={event.photo_url}
           alt={event.title}
-          className="w-full aspect-video object-cover border-b-2 border-navy"
+          className="w-full aspect-video object-cover border-b-2 border-navy transition-transform duration-300 group-hover:scale-[1.03]"
         />
       ) : (
         <div className={`w-full aspect-video ${highlight ? "bg-yellow" : "bg-navy/10"} border-b-2 border-navy flex items-center justify-center`}>
@@ -95,7 +91,7 @@ function EventCard({ event, highlight }: { event: { id: string; title: string; d
             })}
           </span>
         )}
-        <h3 className="font-fredoka font-600 text-navy text-lg">{event.title}</h3>
+        <h3 className="font-fredoka font-600 text-navy text-lg group-hover:text-coral">{event.title}</h3>
         {event.description && (
           <p className="font-nunito text-sm text-navy/70 mt-2 leading-relaxed line-clamp-3 flex-1">
             {event.description}
@@ -105,6 +101,6 @@ function EventCard({ event, highlight }: { event: { id: string; title: string; d
           Posted {new Date(event.created_at).toLocaleDateString("en-IN")}
         </p>
       </div>
-    </div>
+    </article>
   );
 }

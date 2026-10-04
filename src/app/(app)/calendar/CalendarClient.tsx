@@ -106,7 +106,7 @@ export default function CalendarClient({ events: initialEvents, isAdmin }: Props
   return (
     <div>
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="card-cartoon bg-white mb-6 flex flex-wrap items-center gap-x-5 gap-y-3 p-4">
         {Object.entries(TYPE_COLORS).map(([type, color]) => (
           <div key={type} className="flex items-center gap-1.5">
             <div
@@ -119,7 +119,7 @@ export default function CalendarClient({ events: initialEvents, isAdmin }: Props
         {isAdmin && (
           <button
             onClick={() => setShowModal(true)}
-            className="btn-cartoon btn-coral text-xs px-3 py-1.5 ml-auto"
+            className="btn-cartoon btn-coral text-xs px-3 py-1.5 sm:ml-auto"
           >
             <Plus size={14} /> Add Event
           </button>
@@ -138,14 +138,14 @@ export default function CalendarClient({ events: initialEvents, isAdmin }: Props
       {/* Upcoming events list */}
       <div className="mt-8">
         <h2 className="font-fredoka font-600 text-navy text-xl mb-4 flex items-center gap-2">
-          <Calendar size={20} className="text-coral" /> Upcoming Events
+          <span className="grid h-8 w-8 place-items-center rounded-lg border-2 border-navy bg-yellow"><Calendar size={16} /></span> Upcoming Events
         </h2>
         <div className="flex flex-col gap-3">
           {events
             .filter((e) => e.event_date >= new Date().toISOString().split("T")[0])
             .slice(0, 5)
             .map((e) => (
-              <div key={e.id} className="card-cartoon bg-white p-4 flex items-center gap-4">
+              <div key={e.id} className="card-cartoon bg-white p-4 flex items-center gap-4 transition-transform hover:-translate-y-1">
                 <div
                   className="w-2 h-12 rounded-full border border-navy flex-shrink-0"
                   style={{ backgroundColor: TYPE_COLORS[e.type] }}
@@ -164,6 +164,9 @@ export default function CalendarClient({ events: initialEvents, isAdmin }: Props
               </div>
             ))}
         </div>
+        {events.filter((e) => e.event_date >= new Date().toISOString().split("T")[0]).length === 0 && (
+          <div className="rounded-xl border-2 border-dashed border-navy/35 bg-white/65 p-7 text-center font-nunito text-sm text-navy/60">No upcoming dates have been added yet.</div>
+        )}
       </div>
 
       {/* Add event modal */}

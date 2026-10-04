@@ -40,7 +40,7 @@ export default function AlumniClient({ alumni, batches }: Props) {
   return (
     <div>
       {/* Filters */}
-      <div className="card-cartoon bg-white p-5 mb-8 flex flex-col sm:flex-row gap-3">
+      <div className="card-cartoon bg-white p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy/40" />
           <input
@@ -74,15 +74,13 @@ export default function AlumniClient({ alumni, batches }: Props) {
       </div>
 
       {/* Results count */}
-      <p className="font-nunito text-sm text-navy/60 mb-4">
-        Showing <span className="font-700 text-navy">{filtered.length}</span> of {alumni.length} scholars
-      </p>
+      <div className="mb-4 flex items-center justify-between gap-3"><p className="font-nunito text-sm text-navy/60">Showing <span className="font-700 text-navy">{filtered.length}</span> of {alumni.length} scholars</p><span className="badge-cartoon bg-cream text-navy text-xs">Community directory</span></div>
 
       {/* Alumni grid */}
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map((a) => (
-            <div key={a.id} className="card-cartoon bg-white p-5 flex flex-col gap-3">
+            <article key={a.id} className="card-cartoon group bg-white p-5 flex flex-col gap-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-cartoon-lg">
               {/* Avatar */}
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 border-2 border-navy rounded-xl overflow-hidden flex-shrink-0 bg-yellow flex items-center justify-center shadow-cartoon">
@@ -94,7 +92,7 @@ export default function AlumniClient({ alumni, batches }: Props) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-fredoka font-600 text-navy text-base leading-tight truncate">
+                  <h3 className="font-fredoka font-600 text-navy text-base leading-tight truncate group-hover:text-coral">
                     {a.scholar_name}
                   </h3>
                   {a.drn && (
@@ -141,7 +139,7 @@ export default function AlumniClient({ alumni, batches }: Props) {
                   </a>
                 )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       ) : (
