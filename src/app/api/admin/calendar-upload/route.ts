@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import pdfParse from "pdf-parse";
 
 export async function POST(req: NextRequest) {
   const supabase = await createServiceClient();
@@ -15,17 +16,15 @@ export async function POST(req: NextRequest) {
   const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-  // We use pdf-parse server-side
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require("pdf-parse");
   const buffer = Buffer.from(await file.arrayBuffer());
   
   let text = "";
   try {
     const parsed = await pdfParse(buffer);
     text = parsed.text;
-  } catch {
-    return NextResponse.json({ error: "Failed to parse PDF" }, { status: 400 });
+  } catch (e: any) {
+    console.error("PDF parse error:", e);
+    return NextResponse.json({ error: `Failed to parse PDF: ${e.message}` }, { status: 400 });
   }
 
   // Parse calendar events from text
