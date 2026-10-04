@@ -24,21 +24,25 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-      },
+    const response = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fullName, email, password }),
     });
-    if (error) {
-      toast.error(error.message);
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      toast.error(result?.error || "Unable to create your account. Please try again.");
       setLoading(false);
     } else {
+      const supabase = createClient();
       toast.success("Account created! Logging you in...");
-      // Auto sign in after sign up
-      await supabase.auth.signInWithPassword({ email, password });
+      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      if (loginError) {
+        toast.error(`Account created, but login failed: ${loginError.message}`);
+        setLoading(false);
+        return;
+      }
       router.push("/dashboard");
       router.refresh();
       // Keep loading=true during route transition
