@@ -20,25 +20,7 @@ export default function AlumniUploadClient({ currentCount }: { currentCount: num
   const handleFile = async (f: File) => {
     setFile(f);
     setResult(null);
-
-    // Client-side preview using xlsx
-    const { read, utils } = await import("xlsx");
-    const buffer = await f.arrayBuffer();
-    const wb = read(buffer);
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = utils.sheet_to_json<Record<string, string>>(ws, { defval: "" });
-
-    // Map columns (flexible header matching)
-    const mapped = rows.slice(0, 5).map((row) => ({
-      drn: row["DRN"] || row["drn"] || row["Dakshana Roll Number"] || "",
-      scholar_name: row["Scholar Name"] || row["Name"] || row["name"] || "",
-      coe: row["COE"] || row["coe"] || "",
-      parent_school: row["Parent School"] || row["School"] || row["school"] || "",
-      batch: row["Batch"] || row["batch"] || "",
-      phone: row["Phone Number"] || row["Phone"] || row["phone"] || "",
-      email: row["Email"] || row["email"] || "",
-    }));
-    setPreview(mapped);
+    setPreview([]);
   };
 
   const handleUpload = async () => {
@@ -99,9 +81,9 @@ export default function AlumniUploadClient({ currentCount }: { currentCount: num
       </label>
 
       {/* Preview */}
-      {preview.length > 0 && (
+      {file && (
         <div className="mb-6">
-          <p className="font-nunito font-600 text-sm text-navy mb-3">Preview (first 5 rows):</p>
+          {preview.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-xs font-nunito border-2 border-navy rounded-lg overflow-hidden">
               <thead className="bg-navy text-cream">
@@ -126,6 +108,9 @@ export default function AlumniUploadClient({ currentCount }: { currentCount: num
               </tbody>
             </table>
           </div>
+          )}
+
+          <p className="font-nunito text-sm text-navy/70">Ready to upload: {file.name}</p>
 
           <button
             onClick={handleUpload}
