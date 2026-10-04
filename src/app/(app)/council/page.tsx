@@ -32,7 +32,7 @@ export default async function CouncilPage() {
           {members.map((m) => (
             <div key={m.id} className="card-cartoon bg-white overflow-hidden">
               {/* Photo */}
-              <div className="relative h-56 bg-yellow border-b-2 border-navy flex items-center justify-center">
+              <div className="relative aspect-square w-full bg-yellow border-b-2 border-navy flex items-center justify-center">
                 {m.photo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

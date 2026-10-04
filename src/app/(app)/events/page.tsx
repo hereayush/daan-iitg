@@ -78,10 +78,10 @@ function EventCard({ event, highlight }: { event: { id: string; title: string; d
         <img
           src={event.photo_url}
           alt={event.title}
-          className="w-full h-48 object-cover border-b-2 border-navy"
+          className="w-full aspect-video object-cover border-b-2 border-navy"
         />
       ) : (
-        <div className={`w-full h-48 ${highlight ? "bg-yellow" : "bg-navy/10"} border-b-2 border-navy flex items-center justify-center`}>
+        <div className={`w-full aspect-video ${highlight ? "bg-yellow" : "bg-navy/10"} border-b-2 border-navy flex items-center justify-center`}>
           <Zap size={40} className="text-navy/30" />
         </div>
       )}

@@ -103,7 +103,7 @@ export default function CouncilAdmin({ members: initial, isAdmin }: Props) {
       {cropSrc && (
         <ImageCropper
           imageSrc={cropSrc}
-          aspect={4/5}
+          aspect={1}
           onCancel={() => setCropSrc(null)}
           onCropComplete={(blob) => {
             const f = new File([blob], "cropped.jpg", { type: "image/jpeg" });

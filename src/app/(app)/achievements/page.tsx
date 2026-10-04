@@ -36,10 +36,10 @@ export default async function AchievementsPage() {
                 <img
                   src={item.photo_url}
                   alt={item.title}
-                  className="w-full h-52 object-cover border-b-2 border-navy"
+                  className="w-full aspect-video object-cover border-b-2 border-navy"
                 />
               ) : (
-                <div className="w-full h-52 bg-yellow border-b-2 border-navy flex items-center justify-center">
+                <div className="w-full aspect-video bg-yellow border-b-2 border-navy flex items-center justify-center">
                   <Trophy size={48} className="text-navy/40" />
                 </div>
               )}
