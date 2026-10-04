@@ -1,32 +1,39 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Trophy, Users, Calendar, Star, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  Compass,
+  Crown,
+  Sparkles,
+  Star,
+  Trophy,
+  UsersRound,
+  Zap,
+} from "lucide-react";
 
-// Decorative doodle SVG
-function DoodleStar({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2L14.4 9.2H22L16.1 13.8L18.5 21L12 16.4L5.5 21L7.9 13.8L2 9.2H9.6L12 2Z" fill="#FF6B35" stroke="#1a1a2e" strokeWidth="1.5"/>
-    </svg>
-  );
-}
-
-function DoodleDot({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg className={className} style={style} width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <circle cx="6" cy="6" r="5" fill="#FFD60A" stroke="#1a1a2e" strokeWidth="1.5"/>
-    </svg>
-  );
-}
-
-const quickLinks = [
-  { href: "/achievements", label: "Achievements", icon: Trophy, color: "bg-coral", desc: "Scholar milestones & victories" },
-  { href: "/alumni", label: "Alumni Directory", icon: Users, color: "bg-yellow", desc: "Find your fellow Dakshana scholars" },
-  { href: "/council", label: "DAAN Council", icon: Star, color: "bg-sage", desc: "Current council members" },
-  { href: "/events", label: "Events", icon: Zap, color: "bg-coral", desc: "Upcoming & past events" },
-  { href: "/calendar", label: "Calendar", icon: Calendar, color: "bg-yellow", desc: "Academic calendar & holidays" },
+const exploreLinks = [
+  { href: "/achievements", label: "Achievements", description: "Stories worth celebrating", icon: Trophy, accent: "bg-coral" },
+  { href: "/council", label: "DAAN Council", description: "Meet the people leading DAAN", icon: Star, accent: "bg-sage" },
+  { href: "/events", label: "Events", description: "Gatherings, workshops and more", icon: Zap, accent: "bg-yellow" },
+  { href: "/calendar", label: "Calendar", description: "Important dates at a glance", icon: CalendarDays, accent: "bg-white" },
 ];
+
+function SectionTitle({ eyebrow, title, href }: { eyebrow: string; title: string; href: string }) {
+  return (
+    <div className="mb-5 flex items-end justify-between gap-4">
+      <div>
+        <p className="font-nunito text-xs font-bold uppercase tracking-[0.16em] text-coral">{eyebrow}</p>
+        <h2 className="mt-1 font-fredoka text-3xl font-bold tracking-tight text-navy sm:text-4xl">{title}</h2>
+      </div>
+      <Link href={href} className="group mb-1 inline-flex shrink-0 items-center gap-1 font-fredoka text-sm font-semibold text-navy hover:text-coral">
+        View all <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+      </Link>
+    </div>
+  );
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -39,168 +46,119 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // Latest achievements
-  const { data: recentAchievements } = await supabase
-    .from("achievements")
-    .select("id, title, caption, photo_url")
-    .order("created_at", { ascending: false })
-    .limit(3);
+  const [{ data: recentAchievements }, { data: upcomingEvents }] = await Promise.all([
+    supabase.from("achievements").select("id, title, caption, photo_url").order("created_at", { ascending: false }).limit(3),
+    supabase.from("events").select("id, title, event_date, description").gte("event_date", new Date().toISOString().split("T")[0]).order("event_date", { ascending: true }).limit(3),
+  ]);
 
-  // Upcoming events
-  const { data: upcomingEvents } = await supabase
-    .from("events")
-    .select("id, title, event_date, description")
-    .gte("event_date", new Date().toISOString().split("T")[0])
-    .order("event_date", { ascending: true })
-    .limit(3);
+  const firstName = profile?.full_name?.split(" ")[0] || "Scholar";
+  const today = new Intl.DateTimeFormat("en-IN", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  const isAdmin = profile?.role && profile.role !== "user";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Hero greeting */}
-      <div className="relative mb-10 overflow-hidden">
-        <DoodleStar className="absolute top-2 right-12 animate-bounce opacity-80" />
-        <div className="absolute bottom-4 right-32 animate-pulse" style={{ animationDelay: "1s" }}>
-          <DoodleStar />
-        </div>
-        <DoodleDot className="absolute top-6 right-56 opacity-60 animate-bounce" style={{ animationDelay: "0.5s" }} />
-        
-        {/* Colorful Hero Card */}
-        <div className="card-cartoon bg-yellow p-8 sm:p-12 relative z-10 border-4 border-navy overflow-hidden">
-          <div className="absolute -right-12 -top-12 w-48 h-48 bg-coral rounded-full border-4 border-navy opacity-20 blur-xl"></div>
-          <div className="absolute -left-12 -bottom-12 w-32 h-32 bg-sage rounded-full border-4 border-navy opacity-20 blur-lg"></div>
-          
-          <div className="relative z-20">
-            <h1 className="font-fredoka font-700 text-4xl sm:text-5xl text-navy tracking-tight drop-shadow-md">
-              Welcome back, <span className="text-coral">{profile?.full_name?.split(" ")[0] || "Scholar"}</span>! 
-            </h1>
-            <p className="font-nunito font-600 text-navy/80 mt-3 text-lg sm:text-xl max-w-2xl">
-              You're part of the Dakshana Alumni Network at IIT Guwahati. Connect, grow, and give back.
-            </p>
-            {profile?.role && profile.role !== "user" && (
-              <div className="mt-5">
-                <span className="badge-cartoon bg-coral text-white font-fredoka font-600 text-sm px-4 py-1.5 shadow-[2px_2px_0_#1a1a2e] inline-block animate-pulse">
-                  {profile.role === "admin" ? "👑 Super Admin" : "🛡️ Sub Admin"}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <section className="relative isolate overflow-hidden rounded-2xl border-2 border-navy bg-navy px-6 py-8 text-cream shadow-cartoon-lg sm:px-10 sm:py-10 lg:px-12">
+        <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+        <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-coral/80 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-yellow/50 blur-3xl" />
 
-      {/* Quick navigation cards */}
-      <section className="mb-12">
-        <h2 className="section-heading mb-6">Explore</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {quickLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="card-cartoon bg-white p-6 flex items-start gap-4 group hover:-translate-y-2 hover:shadow-cartoon-lg hover:border-coral transition-all duration-300"
-              >
-                <div className={`w-12 h-12 ${link.color} border-2 border-navy rounded-xl flex items-center justify-center flex-shrink-0 shadow-cartoon group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon size={22} className="text-navy" />
-                </div>
-                <div>
-                  <h3 className="font-fredoka font-600 text-navy text-lg group-hover:text-coral transition-colors">
-                    {link.label}
-                  </h3>
-                  <p className="font-nunito text-sm text-navy/60 mt-0.5">
-                    {link.desc}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="relative grid items-end gap-9 lg:grid-cols-[1.3fr_.7fr]">
+          <div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-nunito text-xs font-bold uppercase tracking-[0.16em] text-cream/65">
+              <span>DAAN / IIT Guwahati</span><span className="h-1 w-1 rounded-full bg-yellow" /><span>{today}</span>
+            </div>
+            <h1 className="mt-5 max-w-2xl font-fredoka text-4xl font-bold leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">Good to see you, <span className="text-yellow">{firstName}.</span></h1>
+            <p className="mt-4 max-w-xl font-nunito text-base leading-relaxed text-cream/80 sm:text-lg">Your community is here for the familiar faces, the next opportunity, and everything in between.</p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link href="/alumni" className="btn-cartoon btn-yellow px-5 py-3 text-sm">Find an alumnus <ArrowRight size={17} /></Link>
+              <Link href="/events" className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-cream/70 px-5 py-3 font-fredoka text-sm font-semibold text-cream transition-colors hover:bg-cream hover:text-navy">See what&apos;s on <ArrowUpRight size={17} /></Link>
+            </div>
+          </div>
+
+          <aside className="border-t-2 border-cream/30 pt-6 lg:border-l-2 lg:border-t-0 lg:pl-8 lg:pt-0">
+            <p className="font-nunito text-xs font-bold uppercase tracking-[0.16em] text-yellow">Your DAAN desk</p>
+            <div className="mt-4 divide-y-2 divide-cream/15">
+              {[
+                { href: "/alumni", label: "Alumni directory", note: "Reconnect with your network", icon: UsersRound },
+                { href: "/calendar", label: "Academic calendar", note: "Keep important dates close", icon: CalendarDays },
+                { href: "/achievements", label: "Community wins", note: "See what scholars are doing", icon: Trophy },
+              ].map(({ href, label, note, icon: Icon }) => (
+                <Link key={href} href={href} className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border-2 border-cream/50 bg-cream/10 transition-colors group-hover:bg-yellow group-hover:text-navy"><Icon size={17} /></span>
+                  <span className="min-w-0 flex-1"><span className="block font-fredoka text-base font-semibold">{label}</span><span className="block truncate font-nunito text-xs text-cream/65">{note}</span></span>
+                  <ArrowUpRight size={17} className="shrink-0 text-yellow transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </Link>
+              ))}
+            </div>
+          </aside>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Achievements */}
-        <section>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="section-heading">Recent Achievements</h2>
-            <Link href="/achievements" className="font-nunito text-sm text-coral font-600 hover:underline">
-              View all
-            </Link>
-          </div>
-          {recentAchievements && recentAchievements.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {recentAchievements.map((a) => (
-                <Link href="/achievements" key={a.id} className="card-cartoon bg-white p-4 flex gap-4 items-center group hover:-translate-y-1 hover:shadow-cartoon-lg transition-all duration-300 block">
-                  {a.photo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={a.photo_url}
-                      alt={a.title}
-                      className="w-16 h-16 object-cover rounded-lg border-2 border-navy flex-shrink-0 group-hover:rotate-3 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-yellow border-2 border-navy rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                      <Trophy size={24} className="text-navy" />
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="font-fredoka font-600 text-navy text-base group-hover:text-coral transition-colors">{a.title}</h4>
-                    {a.caption && (
-                      <p className="font-nunito text-sm text-navy/60 mt-0.5 line-clamp-1">{a.caption}</p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="card-cartoon bg-white p-8 text-center">
-              <Trophy size={36} className="text-navy/30 mx-auto mb-2" />
-              <p className="font-nunito text-navy/50">No achievements posted yet.</p>
-            </div>
-          )}
-        </section>
+      {isAdmin && (
+        <Link href="/admin" className="mt-6 flex items-center justify-between gap-4 rounded-xl border-2 border-navy bg-yellow p-4 shadow-cartoon transition-transform hover:-translate-y-1">
+          <span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg border-2 border-navy bg-coral text-white"><Crown size={17} /></span><span><span className="block font-fredoka font-semibold text-navy">{profile.role === "admin" ? "Admin workspace" : "Sub-admin workspace"}</span><span className="block font-nunito text-sm text-navy/70">Manage updates, people, and community content.</span></span></span><ArrowRight size={19} className="shrink-0" />
+        </Link>
+      )}
 
-        {/* Upcoming Events */}
-        <section>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="section-heading">Upcoming Events</h2>
-            <Link href="/events" className="font-nunito text-sm text-coral font-600 hover:underline">
-              View all
-            </Link>
+      <section className="mt-14">
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div><p className="font-nunito text-xs font-bold uppercase tracking-[0.16em] text-coral">Start exploring</p><h2 className="mt-1 font-fredoka text-3xl font-bold tracking-tight text-navy sm:text-4xl">Make DAAN useful today.</h2></div>
+          <p className="max-w-sm font-nunito text-sm leading-relaxed text-navy/60">Pick up a conversation, celebrate a win, or stay one step ahead of the next date.</p>
+        </div>
+        <div className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]">
+          <Link href="/alumni" className="group relative overflow-hidden rounded-2xl border-2 border-navy bg-coral p-7 text-white shadow-cartoon transition-transform duration-200 hover:-translate-y-1 sm:p-8">
+            <div className="absolute -right-8 -top-7 h-40 w-40 rounded-full border-2 border-navy bg-yellow/90" />
+            <div className="relative flex h-full flex-col justify-between gap-10"><div><span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-navy bg-yellow text-navy shadow-cartoon"><UsersRound size={22} /></span><p className="mt-8 font-nunito text-xs font-bold uppercase tracking-[0.16em] text-white/75">People first</p><h3 className="mt-2 max-w-sm font-fredoka text-3xl font-bold leading-tight">Find someone from your DAAN story.</h3></div><span className="inline-flex items-center gap-2 font-fredoka font-semibold">Browse the directory <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></span></div>
+          </Link>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {exploreLinks.map(({ href, label, description, icon: Icon, accent }) => (
+              <Link key={href} href={href} className="group flex min-h-40 flex-col justify-between rounded-xl border-2 border-navy bg-white p-5 shadow-cartoon transition-all duration-200 hover:-translate-y-1 hover:shadow-cartoon-lg">
+                <span className={`grid h-10 w-10 place-items-center rounded-lg border-2 border-navy ${accent} text-navy`}><Icon size={18} /></span>
+                <span><span className="flex items-center justify-between gap-2 font-fredoka text-lg font-semibold text-navy group-hover:text-coral">{label}<ArrowUpRight size={16} /></span><span className="mt-1 block font-nunito text-sm leading-snug text-navy/60">{description}</span></span>
+              </Link>
+            ))}
           </div>
-          {upcomingEvents && upcomingEvents.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {upcomingEvents.map((event) => (
-                <Link href="/events" key={event.id} className="card-cartoon bg-white p-4 group hover:-translate-y-1 hover:shadow-cartoon-lg transition-all duration-300 block">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-coral border-2 border-navy rounded-lg px-2.5 py-1 flex-shrink-0 text-center min-w-14 group-hover:-rotate-6 transition-transform duration-300">
-                      <p className="font-fredoka font-700 text-white text-sm leading-none">
-                        {event.event_date
-                          ? new Date(event.event_date).toLocaleDateString("en-IN", { day: "2-digit" })
-                          : "TBD"}
-                      </p>
-                      <p className="font-nunito text-white/80 text-xs">
-                        {event.event_date
-                          ? new Date(event.event_date).toLocaleDateString("en-IN", { month: "short" })
-                          : ""}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-fredoka font-600 text-navy text-base group-hover:text-coral transition-colors">{event.title}</h4>
-                      {event.description && (
-                        <p className="font-nunito text-sm text-navy/60 mt-0.5 line-clamp-2">{event.description}</p>
-                      )}
-                    </div>
-                  </div>
+        </div>
+      </section>
+
+      <section className="mt-16 grid gap-10 lg:grid-cols-2 lg:gap-12">
+        <div>
+          <SectionTitle eyebrow="Latest from the community" title="Achievements" href="/achievements" />
+          {recentAchievements && recentAchievements.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border-2 border-navy bg-white shadow-cartoon">
+              {recentAchievements.map((achievement, index) => (
+                <Link href="/achievements" key={achievement.id} className={`group flex gap-4 p-4 transition-colors hover:bg-cream ${index > 0 ? "border-t-2 border-navy/15" : ""}`}>
+                  {achievement.photo_url ? <img src={achievement.photo_url} alt="" className="h-16 w-16 shrink-0 rounded-lg border-2 border-navy object-cover" /> : <span className="grid h-16 w-16 shrink-0 place-items-center rounded-lg border-2 border-navy bg-yellow"><Trophy size={24} /></span>}
+                  <span className="min-w-0 flex-1"><span className="flex items-start justify-between gap-3 font-fredoka text-lg font-semibold text-navy group-hover:text-coral"><span className="line-clamp-1">{achievement.title}</span><ArrowUpRight size={16} className="mt-1 shrink-0" /></span>{achievement.caption && <span className="mt-1 block line-clamp-1 font-nunito text-sm text-navy/60">{achievement.caption}</span>}</span>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="card-cartoon bg-white p-8 text-center">
-              <Zap size={36} className="text-navy/30 mx-auto mb-2" />
-              <p className="font-nunito text-navy/50">No upcoming events.</p>
-            </div>
+            <div className="rounded-xl border-2 border-dashed border-navy/35 bg-white/65 p-8 text-center"><Trophy size={30} className="mx-auto text-coral" /><p className="mt-3 font-fredoka text-lg font-semibold text-navy">The next win could be yours.</p><p className="mt-1 font-nunito text-sm text-navy/60">Community achievements will appear here.</p></div>
           )}
-        </section>
-      </div>
+        </div>
+        <div>
+          <SectionTitle eyebrow="Save the date" title="Upcoming events" href="/events" />
+          {upcomingEvents && upcomingEvents.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border-2 border-navy bg-white shadow-cartoon">
+              {upcomingEvents.map((event, index) => (
+                <Link href="/events" key={event.id} className={`group flex gap-4 p-4 transition-colors hover:bg-cream ${index > 0 ? "border-t-2 border-navy/15" : ""}`}>
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-lg border-2 border-navy bg-navy text-center text-cream"><span className="font-fredoka text-xl font-bold leading-none">{event.event_date ? new Date(event.event_date).toLocaleDateString("en-IN", { day: "2-digit" }) : "?"}</span><span className="mt-1 font-nunito text-[11px] font-bold uppercase tracking-wide text-yellow">{event.event_date ? new Date(event.event_date).toLocaleDateString("en-IN", { month: "short" }) : "TBD"}</span></span>
+                  <span className="min-w-0 flex-1"><span className="flex items-start justify-between gap-3 font-fredoka text-lg font-semibold text-navy group-hover:text-coral"><span className="line-clamp-1">{event.title}</span><ArrowUpRight size={16} className="mt-1 shrink-0" /></span>{event.description && <span className="mt-1 block line-clamp-1 font-nunito text-sm text-navy/60">{event.description}</span>}</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border-2 border-dashed border-navy/35 bg-white/65 p-8 text-center"><Compass size={30} className="mx-auto text-coral" /><p className="mt-3 font-fredoka text-lg font-semibold text-navy">Your next DAAN moment is on its way.</p><p className="mt-1 font-nunito text-sm text-navy/60">New events will appear here as they are announced.</p></div>
+          )}
+        </div>
+      </section>
+
+      <section className="relative mt-16 overflow-hidden rounded-2xl border-2 border-navy bg-sage px-6 py-8 shadow-cartoon sm:flex sm:items-center sm:justify-between sm:px-8">
+        <Sparkles className="absolute -right-2 -top-3 h-24 w-24 text-yellow/70" strokeWidth={1.5} />
+        <div className="relative max-w-xl"><p className="font-nunito text-xs font-bold uppercase tracking-[0.16em] text-navy/60">A community habit</p><h2 className="mt-2 font-fredoka text-2xl font-bold text-navy sm:text-3xl">A familiar name is only one hello away.</h2><p className="mt-2 font-nunito text-sm leading-relaxed text-navy/70">Use the directory to find batchmates, mentors, and fellow Dakshana scholars.</p></div>
+        <Link href="/alumni" className="btn-cartoon btn-white relative mt-6 shrink-0 px-5 py-3 text-sm sm:mt-0">Open directory <ArrowRight size={17} /></Link>
+      </section>
     </div>
   );
 }
