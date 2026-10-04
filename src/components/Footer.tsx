@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -9,9 +10,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-9 h-9 bg-coral border-2 border-cream rounded-lg flex items-center justify-center">
-                <span className="font-fredoka font-700 text-white text-sm">D</span>
-              </div>
+              <BrandLogo className="h-10 w-10 border-2 border-cream" />
               <span className="font-fredoka font-700 text-xl text-cream">DAAN IITG</span>
             </div>
             <p className="font-nunito text-sm text-cream/80 leading-relaxed">

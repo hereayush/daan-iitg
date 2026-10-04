@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 import { Menu, X, LogOut, User, Shield } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 const navLinks = [
   { href: "/dashboard", label: "Home" },
@@ -46,9 +47,7 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 bg-coral border-2 border-navy rounded-lg flex items-center justify-center shadow-cartoon group-hover:-translate-y-0.5 transition-transform">
-            <span className="font-fredoka font-700 text-white text-sm leading-none">D</span>
-          </div>
+          <BrandLogo className="h-10 w-10 border-2 border-navy shadow-cartoon transition-transform group-hover:-translate-y-0.5" priority />
           <span className="font-fredoka font-700 text-xl text-navy tracking-wide hidden sm:inline">
             DAAN IITG
           </span>

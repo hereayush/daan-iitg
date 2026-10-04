@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, BellRing, BookOpen, CalendarDays, HeartHandshake, Sparkles, Trophy, UsersRound } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 export const metadata: Metadata = {
   title: "DAAN IITG — Dakshana Alumni Network",
@@ -19,7 +20,7 @@ export default function LandingPage() {
       <header className="relative z-20 border-b-2 border-navy bg-cream/90 backdrop-blur">
         <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="group flex items-center gap-3" aria-label="DAAN IITG home">
-            <span className="grid h-10 w-10 place-items-center rounded-xl border-2 border-navy bg-coral font-fredoka text-lg font-bold text-white shadow-cartoon transition-transform group-hover:-translate-y-0.5">D</span>
+            <BrandLogo className="h-11 w-11 border-2 border-navy shadow-cartoon transition-transform group-hover:-translate-y-0.5" priority />
             <span><span className="block font-fredoka text-lg font-bold leading-none text-navy">DAAN IITG</span><span className="mt-1 block font-nunito text-[10px] font-bold uppercase tracking-[0.16em] text-navy/55">Dakshana Alumni Network</span></span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — DAAN IITG",
@@ -13,9 +14,7 @@ export default function PrivacyPage() {
       <header className="bg-white border-b-2 border-navy">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-coral border-2 border-navy rounded-lg flex items-center justify-center shadow-cartoon">
-              <span className="font-fredoka font-700 text-white text-xs">D</span>
-            </div>
+            <BrandLogo className="h-9 w-9 border-2 border-navy shadow-cartoon" />
             <span className="font-fredoka font-700 text-lg text-navy">DAAN IITG</span>
           </Link>
           <Link href="/" className="font-nunito text-sm text-coral hover:underline">← Back</Link>

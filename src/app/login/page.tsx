@@ -8,6 +8,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -36,9 +37,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 bg-coral border-2 border-navy rounded-xl flex items-center justify-center shadow-cartoon">
-          <span className="font-fredoka font-700 text-white">D</span>
-        </div>
+        <BrandLogo className="h-11 w-11 border-2 border-navy shadow-cartoon" priority />
         <span className="font-fredoka font-700 text-2xl text-navy">DAAN IITG</span>
       </Link>
 
