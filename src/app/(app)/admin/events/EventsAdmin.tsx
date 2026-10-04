@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Plus, Trash2, Zap, X, Upload } from "lucide-react";
 import type { Event } from "@/lib/types";
+import ImageCropper from "@/components/ImageCropper";
 
 interface Props { events: Event[]; }
 export default function EventsAdmin({ events: initial }: Props) {
@@ -12,6 +13,7 @@ export default function EventsAdmin({ events: initial }: Props) {
   const [form, setForm] = useState({ title: "", description: "", event_date: "" });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -69,13 +71,31 @@ export default function EventsAdmin({ events: initial }: Props) {
                 <label className="font-nunito font-600 text-sm text-navy mb-1 block">Photo</label>
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-navy rounded-lg cursor-pointer bg-cream hover:bg-yellow/20">
                   {preview ? <img src={preview} alt="p" className="h-full object-contain rounded-lg" /> : <><Upload size={24} className="text-navy/40 mb-1" /><span className="font-nunito text-sm text-navy/50">Upload photo</span></>}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f){setFile(f);setPreview(URL.createObjectURL(f))} }} />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { 
+                    const f = e.target.files?.[0]; 
+                    if(f){ setCropSrc(URL.createObjectURL(f)); } 
+                    e.target.value = "";
+                  }} />
                 </label>
               </div>
               <button type="submit" disabled={loading} className="btn-cartoon btn-coral w-full mt-2 disabled:opacity-60">{loading ? "Posting..." : "Post Event"}</button>
             </form>
           </div>
         </div>
+      )}
+
+      {cropSrc && (
+        <ImageCropper
+          imageSrc={cropSrc}
+          aspect={16/9}
+          onCancel={() => setCropSrc(null)}
+          onCropComplete={(blob) => {
+            const f = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+            setFile(f);
+            setPreview(URL.createObjectURL(blob));
+            setCropSrc(null);
+          }}
+        />
       )}
       <div className="flex flex-col gap-4">
         {events.length === 0 && <div className="card-cartoon bg-white p-12 text-center"><Zap size={40} className="text-navy/20 mx-auto mb-3" /><p className="font-nunito text-navy/50">No events yet.</p></div>}

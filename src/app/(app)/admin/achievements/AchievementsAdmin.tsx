@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Upload, Trash2, Plus, Trophy, X } from "lucide-react";
 import type { Achievement } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import ImageCropper from "@/components/ImageCropper";
 
 interface Props {
   achievements: Achievement[];
@@ -20,13 +21,13 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
   const handleFile = (f: File) => {
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
+    setCropSrc(URL.createObjectURL(f));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +128,12 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
                       <span className="font-nunito text-sm text-navy/50">Click to upload image</span>
                     </div>
                   )}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFile(e.target.files[0]);
+                    }
+                    e.target.value = "";
+                  }} />
                 </label>
               </div>
               <button type="submit" disabled={loading} className="btn-cartoon btn-coral w-full mt-2 disabled:opacity-60">
@@ -136,6 +142,20 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
             </form>
           </div>
         </div>
+      )}
+
+      {cropSrc && (
+        <ImageCropper
+          imageSrc={cropSrc}
+          aspect={16/9}
+          onCancel={() => setCropSrc(null)}
+          onCropComplete={(blob) => {
+            const f = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+            setFile(f);
+            setPreview(URL.createObjectURL(blob));
+            setCropSrc(null);
+          }}
+        />
       )}
 
       {/* List */}

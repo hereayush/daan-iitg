@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Upload, Trash2, Plus, Star, X } from "lucide-react";
 import type { CouncilMember } from "@/lib/types";
+import ImageCropper from "@/components/ImageCropper";
 
 interface Props { members: CouncilMember[]; isAdmin: boolean; }
 
@@ -14,6 +15,7 @@ export default function CouncilAdmin({ members: initial, isAdmin }: Props) {
   const [form, setForm] = useState({ name: "", designation: "", phone: "", email: "", linkedin_url: "", display_order: "0" });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -85,13 +87,31 @@ export default function CouncilAdmin({ members: initial, isAdmin }: Props) {
                 <label className="font-nunito font-600 text-sm text-navy mb-1 block">Photo</label>
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-navy rounded-lg cursor-pointer bg-cream hover:bg-yellow/20">
                   {preview ? <img src={preview} alt="preview" className="h-full object-contain rounded-lg" /> : <><Upload size={24} className="text-navy/40 mb-1" /><span className="font-nunito text-sm text-navy/50">Upload photo</span></>}
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f){setFile(f);setPreview(URL.createObjectURL(f))} }} />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { 
+                    const f = e.target.files?.[0]; 
+                    if(f){ setCropSrc(URL.createObjectURL(f)); } 
+                    e.target.value = "";
+                  }} />
                 </label>
               </div>
               <button type="submit" disabled={loading} className="btn-cartoon btn-coral w-full mt-2 disabled:opacity-60">{loading ? "Saving..." : "Add Member"}</button>
             </form>
           </div>
         </div>
+      )}
+
+      {cropSrc && (
+        <ImageCropper
+          imageSrc={cropSrc}
+          aspect={4/5}
+          onCancel={() => setCropSrc(null)}
+          onCropComplete={(blob) => {
+            const f = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+            setFile(f);
+            setPreview(URL.createObjectURL(blob));
+            setCropSrc(null);
+          }}
+        />
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
