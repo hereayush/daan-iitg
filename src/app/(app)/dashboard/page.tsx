@@ -4,17 +4,17 @@ import Link from "next/link";
 import { Trophy, Users, Calendar, Star, Zap } from "lucide-react";
 
 // Decorative doodle SVG
-function DoodleStar({ className }: { className?: string }) {
+function DoodleStar({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M12 2L14.4 9.2H22L16.1 13.8L18.5 21L12 16.4L5.5 21L7.9 13.8L2 9.2H9.6L12 2Z" fill="#FF6B35" stroke="#1a1a2e" strokeWidth="1.5"/>
     </svg>
   );
 }
 
-function DoodleDot({ className }: { className?: string }) {
+function DoodleDot({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg className={className} width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <svg className={className} style={style} width="12" height="12" viewBox="0 0 12 12" fill="none">
       <circle cx="6" cy="6" r="5" fill="#FFD60A" stroke="#1a1a2e" strokeWidth="1.5"/>
     </svg>
   );
