@@ -58,23 +58,32 @@ export default async function DashboardPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Hero greeting */}
       <div className="relative mb-10 overflow-hidden">
-        <DoodleStar className="absolute top-0 right-8 animate-float opacity-70" />
-        <div className="absolute bottom-2 right-32 animate-float" style={{ animationDelay: "1s" }}>
+        <DoodleStar className="absolute top-2 right-12 animate-bounce opacity-80" />
+        <div className="absolute bottom-4 right-32 animate-pulse" style={{ animationDelay: "1s" }}>
           <DoodleStar />
         </div>
-        <DoodleDot className="absolute top-4 right-48 opacity-60" />
-        <div className="card-cartoon bg-white p-8 sm:p-10">
-          <h1 className="font-fredoka font-700 text-3xl sm:text-4xl text-navy">
-            Welcome back, {profile?.full_name?.split(" ")[0] || "Scholar"}! 
-          </h1>
-          <p className="font-nunito text-navy/70 mt-2 text-lg">
-            You are part of the Dakshana Alumni Network at IIT Guwahati.
-          </p>
-          {profile?.role && profile.role !== "user" && (
-            <span className="badge-cartoon bg-yellow mt-3 inline-block">
-              {profile.role === "admin" ? "Super Admin" : "Sub Admin"}
-            </span>
-          )}
+        <DoodleDot className="absolute top-6 right-56 opacity-60 animate-bounce" style={{ animationDelay: "0.5s" }} />
+        
+        {/* Colorful Hero Card */}
+        <div className="card-cartoon bg-yellow p-8 sm:p-12 relative z-10 border-4 border-navy overflow-hidden">
+          <div className="absolute -right-12 -top-12 w-48 h-48 bg-coral rounded-full border-4 border-navy opacity-20 blur-xl"></div>
+          <div className="absolute -left-12 -bottom-12 w-32 h-32 bg-sage rounded-full border-4 border-navy opacity-20 blur-lg"></div>
+          
+          <div className="relative z-20">
+            <h1 className="font-fredoka font-700 text-4xl sm:text-5xl text-navy tracking-tight drop-shadow-md">
+              Welcome back, <span className="text-coral">{profile?.full_name?.split(" ")[0] || "Scholar"}</span>! 
+            </h1>
+            <p className="font-nunito font-600 text-navy/80 mt-3 text-lg sm:text-xl max-w-2xl">
+              You're part of the Dakshana Alumni Network at IIT Guwahati. Connect, grow, and give back.
+            </p>
+            {profile?.role && profile.role !== "user" && (
+              <div className="mt-5">
+                <span className="badge-cartoon bg-coral text-white font-fredoka font-600 text-sm px-4 py-1.5 shadow-[2px_2px_0_#1a1a2e] inline-block animate-pulse">
+                  {profile.role === "admin" ? "👑 Super Admin" : "🛡️ Sub Admin"}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -88,9 +97,9 @@ export default async function DashboardPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="card-cartoon bg-white p-6 flex items-start gap-4 group"
+                className="card-cartoon bg-white p-6 flex items-start gap-4 group hover:-translate-y-2 hover:shadow-cartoon-lg hover:border-coral transition-all duration-300"
               >
-                <div className={`w-12 h-12 ${link.color} border-2 border-navy rounded-xl flex items-center justify-center flex-shrink-0 shadow-cartoon`}>
+                <div className={`w-12 h-12 ${link.color} border-2 border-navy rounded-xl flex items-center justify-center flex-shrink-0 shadow-cartoon group-hover:scale-110 transition-transform duration-300`}>
                   <Icon size={22} className="text-navy" />
                 </div>
                 <div>
@@ -119,26 +128,26 @@ export default async function DashboardPage() {
           {recentAchievements && recentAchievements.length > 0 ? (
             <div className="flex flex-col gap-4">
               {recentAchievements.map((a) => (
-                <div key={a.id} className="card-cartoon bg-white p-4 flex gap-4 items-center">
+                <Link href="/achievements" key={a.id} className="card-cartoon bg-white p-4 flex gap-4 items-center group hover:-translate-y-1 hover:shadow-cartoon-lg transition-all duration-300 block">
                   {a.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={a.photo_url}
                       alt={a.title}
-                      className="w-16 h-16 object-cover rounded-lg border-2 border-navy flex-shrink-0"
+                      className="w-16 h-16 object-cover rounded-lg border-2 border-navy flex-shrink-0 group-hover:rotate-3 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-yellow border-2 border-navy rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 bg-yellow border-2 border-navy rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                       <Trophy size={24} className="text-navy" />
                     </div>
                   )}
                   <div>
-                    <h4 className="font-fredoka font-600 text-navy text-base">{a.title}</h4>
+                    <h4 className="font-fredoka font-600 text-navy text-base group-hover:text-coral transition-colors">{a.title}</h4>
                     {a.caption && (
                       <p className="font-nunito text-sm text-navy/60 mt-0.5 line-clamp-1">{a.caption}</p>
                     )}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -160,9 +169,9 @@ export default async function DashboardPage() {
           {upcomingEvents && upcomingEvents.length > 0 ? (
             <div className="flex flex-col gap-4">
               {upcomingEvents.map((event) => (
-                <div key={event.id} className="card-cartoon bg-white p-4">
+                <Link href="/events" key={event.id} className="card-cartoon bg-white p-4 group hover:-translate-y-1 hover:shadow-cartoon-lg transition-all duration-300 block">
                   <div className="flex items-start gap-3">
-                    <div className="bg-coral border-2 border-navy rounded-lg px-2.5 py-1 flex-shrink-0 text-center min-w-14">
+                    <div className="bg-coral border-2 border-navy rounded-lg px-2.5 py-1 flex-shrink-0 text-center min-w-14 group-hover:-rotate-6 transition-transform duration-300">
                       <p className="font-fredoka font-700 text-white text-sm leading-none">
                         {event.event_date
                           ? new Date(event.event_date).toLocaleDateString("en-IN", { day: "2-digit" })
@@ -175,13 +184,13 @@ export default async function DashboardPage() {
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-fredoka font-600 text-navy text-base">{event.title}</h4>
+                      <h4 className="font-fredoka font-600 text-navy text-base group-hover:text-coral transition-colors">{event.title}</h4>
                       {event.description && (
                         <p className="font-nunito text-sm text-navy/60 mt-0.5 line-clamp-2">{event.description}</p>
                       )}
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

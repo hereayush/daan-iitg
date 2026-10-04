@@ -34,14 +34,15 @@ export default function RegisterPage() {
     });
     if (error) {
       toast.error(error.message);
+      setLoading(false);
     } else {
       toast.success("Account created! Logging you in...");
       // Auto sign in after sign up
       await supabase.auth.signInWithPassword({ email, password });
       router.push("/dashboard");
       router.refresh();
+      // Keep loading=true during route transition
     }
-    setLoading(false);
   };
 
   return (

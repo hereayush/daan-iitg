@@ -29,6 +29,9 @@ html {
 
 body {
   background-color: #FEFAE0;
+  background-image: radial-gradient(#1a1a2e15 2px, transparent 2px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
   color: #1a1a2e;
 }
 

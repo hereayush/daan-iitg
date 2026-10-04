@@ -23,12 +23,13 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
+      setLoading(false);
     } else {
       toast.success("Welcome back!");
       router.push("/dashboard");
       router.refresh();
+      // Keep loading=true so spinner stays during Next.js navigation transition
     }
-    setLoading(false);
   };
 
   return (
