@@ -24,7 +24,8 @@ export default function EventsAdmin({ events: initial }: Props) {
       const ext = file.name.split(".").pop();
       const path = `events/${Date.now()}.${ext}`;
       const { error: ue } = await supabase.storage.from("daan-media").upload(path, file, { upsert: true });
-      if (!ue) { const { data } = supabase.storage.from("daan-media").getPublicUrl(path); photo_url = data.publicUrl; }
+      if (ue) { toast.error(`Photo upload failed: ${ue.message}`); setLoading(false); return; }
+      const { data } = supabase.storage.from("daan-media").getPublicUrl(path); photo_url = data.publicUrl;
     }
     const { data: user } = await supabase.auth.getUser();
     const { data, error } = await supabase.from("events").insert({
