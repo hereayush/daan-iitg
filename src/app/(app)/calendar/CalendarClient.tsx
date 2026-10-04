@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
+import dynamic from "next/dynamic";
 import type { CalendarEvent } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Plus, X, Calendar } from "lucide-react";
+import { Plus, X, Calendar, Loader2 } from "lucide-react";
+
+// Dynamically import FullCalendar with SSR disabled — it uses browser APIs that crash on the server
+const FullCalendarWrapper = dynamic(() => import("./FullCalendarWrapper"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-64">
+      <Loader2 className="w-8 h-8 animate-spin text-coral" />
+    </div>
+  ),
+});
 
 const TYPE_COLORS: Record<string, string> = {
   holiday: "#FF6B35",
@@ -121,36 +128,10 @@ export default function CalendarClient({ events: initialEvents, isAdmin }: Props
 
       {/* Calendar */}
       <div className="card-cartoon bg-white p-4 sm:p-6 overflow-x-auto">
-        <style>{`
-          .fc .fc-button { 
-            background: #1a1a2e !important; 
-            border: 2px solid #1a1a2e !important;
-            color: white !important;
-            border-radius: 6px !important;
-            font-family: var(--font-fredoka) !important;
-            font-weight: 600 !important;
-            box-shadow: 2px 2px 0 #1a1a2e !important;
-          }
-          .fc .fc-button:hover { background: #FF6B35 !important; }
-          .fc .fc-toolbar-title { font-family: var(--font-fredoka) !important; font-size: 1.4rem !important; color: #1a1a2e !important; }
-          .fc .fc-day-today { background: #FEFAE0 !important; }
-          .fc .fc-event { border-radius: 4px !important; border: 1.5px solid #1a1a2e !important; cursor: pointer !important; }
-          .fc .fc-col-header-cell { font-family: var(--font-fredoka) !important; }
-          .fc .fc-daygrid-day-number { font-family: var(--font-nunito) !important; }
-        `}</style>
-        <FullCalendar
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          plugins={[dayGridPlugin, interactionPlugin, listPlugin] as any[]}
-          initialView="dayGridMonth"
+        <FullCalendarWrapper
           events={calEvents}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,listMonth",
-          }}
-          height="auto"
+          onDateClick={handleDateClick}
+          onEventClick={handleEventClick as any}
         />
       </div>
 
