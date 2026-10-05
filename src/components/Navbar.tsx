@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
-import { Menu, X, LogOut, User, Shield } from "lucide-react";
+import { ArrowLeft, Menu, X, LogOut, User, Shield } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 
 const navLinks = [
@@ -36,6 +36,14 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
     router.refresh();
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push("/dashboard");
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
@@ -45,13 +53,25 @@ export default function Navbar({ profile }: { profile: Profile | null }) {
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2 group">
-          <BrandLogo className="h-10 w-10 border-2 border-navy shadow-cartoon transition-transform group-hover:-translate-y-0.5" priority />
-          <span className="font-fredoka font-700 text-xl text-navy tracking-wide hidden sm:inline">
-            DAAN IITG
-          </span>
-        </Link>
+        <div className="flex items-center gap-2">
+          {pathname !== "/dashboard" && (
+            <button
+              onClick={handleBack}
+              className="btn-cartoon btn-white px-2.5 py-2"
+              aria-label="Go back"
+              title="Go back"
+            >
+              <ArrowLeft size={18} />
+              <span className="hidden sm:inline text-sm">Back</span>
+            </button>
+          )}
+          <Link href="/dashboard" className="flex items-center gap-2 group">
+            <BrandLogo className="h-10 w-10 border-2 border-navy shadow-cartoon transition-transform group-hover:-translate-y-0.5" priority />
+            <span className="font-fredoka font-700 text-xl text-navy tracking-wide hidden sm:inline">
+              DAAN IITG
+            </span>
+          </Link>
+        </div>
 
         {/* Desktop Nav */}
         <ul className="hidden lg:flex items-center gap-1">
