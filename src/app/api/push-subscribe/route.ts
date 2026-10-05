@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { endpoint, p256dh, auth } = await req.json();
@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  // This endpoint is authenticated above; use the server-only client so a
+  // subscriber is not blocked by a missing or overly restrictive RLS policy.
+  const supabase = await createServiceClient();
   const { error } = await supabase.from("push_subscriptions").upsert(
     { user_id: user.id, endpoint, p256dh, auth },
     { onConflict: "endpoint" }
@@ -21,11 +24,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { endpoint } = await req.json();
-  await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", user.id);
+  const supabase = await createServiceClient();
+  const { error } = await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", user.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

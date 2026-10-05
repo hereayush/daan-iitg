@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import webpush from "web-push";
 
 // Initialize VAPID inside the handler so it's only called at runtime, not build time
@@ -15,10 +15,11 @@ function initVapid() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServiceClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const supabase = await createServiceClient();
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (!profile || !["admin", "sub_admin"].includes(profile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -27,22 +28,24 @@ export async function POST(req: NextRequest) {
   const { title, body, url } = await req.json();
   if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
 
-  // Save notification to history
-  await supabase.from("notifications").insert({ title, body, url, sent_at: new Date().toISOString() });
-
   // Check if VAPID is configured
   if (!initVapid()) {
-    return NextResponse.json({ sent: 0, warning: "VAPID keys not configured" });
+    return NextResponse.json({ error: "Push notifications are not configured. Add the VAPID keys in Vercel and redeploy." }, { status: 503 });
   }
+
+  // Save only notifications that can actually be sent.
+  const { error: historyError } = await supabase.from("notifications").insert({ title, body, url, sent_at: new Date().toISOString() });
+  if (historyError) return NextResponse.json({ error: "Could not save notification history." }, { status: 500 });
 
   // Get all subscriptions
   const { data: subs } = await supabase.from("push_subscriptions").select("*");
   if (!subs || subs.length === 0) {
-    return NextResponse.json({ sent: 0 });
+    return NextResponse.json({ sent: 0, failed: 0 });
   }
 
   const payload = JSON.stringify({ title, body, url: url || "/" });
   let sent = 0;
+  let failed = 0;
   const toDelete: string[] = [];
 
   await Promise.allSettled(
@@ -54,6 +57,7 @@ export async function POST(req: NextRequest) {
         );
         sent++;
       } catch (err: unknown) {
+        failed++;
         if (err && typeof err === "object" && "statusCode" in err &&
           (err.statusCode === 404 || err.statusCode === 410)) {
           toDelete.push(sub.id);
@@ -66,5 +70,5 @@ export async function POST(req: NextRequest) {
     await supabase.from("push_subscriptions").delete().in("id", toDelete);
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, failed });
 }

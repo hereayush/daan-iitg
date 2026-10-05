@@ -8,7 +8,7 @@ export default function NotificationsAdmin() {
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ sent: number } | null>(null);
+  const [result, setResult] = useState<{ sent: number; failed: number } | null>(null);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +74,7 @@ export default function NotificationsAdmin() {
           <div>
             <p className="font-fredoka font-600 text-navy text-base">Notification delivered</p>
             <p className="font-nunito text-sm text-navy/60">Sent to {result.sent} active subscribers.</p>
+            {result.failed > 0 && <p className="font-nunito text-xs text-coral mt-1">{result.failed} inactive subscription{result.failed === 1 ? " was" : "s were"} skipped.</p>}
           </div>
         </div>
       )}
