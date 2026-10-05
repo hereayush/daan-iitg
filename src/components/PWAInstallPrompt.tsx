@@ -1,79 +1,73 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, MonitorDown, Smartphone } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+function isInstalled() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+}
+
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [show, setShow] = useState(false);
+  const [installed, setInstalled] = useState(false);
+  const [installRequested, setInstallRequested] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("pwa-prompt-dismissed");
-    if (dismissed) return;
+    setInstalled(isInstalled());
+    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
 
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show prompt after 3 seconds
-      setTimeout(() => setShow(true), 3000);
+    const handlePrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleInstalled = () => {
+      setInstalled(true);
+      setDeferredPrompt(null);
     };
 
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    window.addEventListener("beforeinstallprompt", handlePrompt);
+    window.addEventListener("appinstalled", handleInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handlePrompt);
+      window.removeEventListener("appinstalled", handleInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setShow(false);
-      setDeferredPrompt(null);
-    }
+    if (outcome === "accepted") setInstallRequested(true);
+    else setDeferredPrompt(null);
   };
 
-  const handleDismiss = () => {
-    setShow(false);
-    localStorage.setItem("pwa-prompt-dismissed", "true");
-  };
-
-  if (!show) return null;
+  if (installed) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-50 animate-fade-in-up">
-      <div className="card-cartoon bg-white p-4">
-        <button
-          onClick={handleDismiss}
-          className="absolute top-3 right-3 text-navy/50 hover:text-navy"
-          aria-label="Dismiss"
-        >
-          <X size={16} />
-        </button>
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-coral border-2 border-navy rounded-lg flex items-center justify-center flex-shrink-0">
-            <Download size={18} className="text-white" />
-          </div>
-          <div>
-            <p className="font-fredoka font-600 text-navy text-base leading-tight">
-              Install DAAN IITG
-            </p>
-            <p className="font-nunito text-sm text-navy/70 mt-0.5 leading-snug">
-              Add to your home screen for quick access — works offline too!
-            </p>
-            <button
-              onClick={handleInstall}
-              className="btn-cartoon btn-coral text-sm mt-3 w-full"
-            >
-              <Download size={14} />
-              Install App
-            </button>
-          </div>
+    <div className="fixed inset-0 z-[100] grid place-items-center bg-navy/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div className="card-cartoon w-full max-w-md bg-white p-7 text-center animate-fade-in-up">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl border-2 border-navy bg-coral shadow-cartoon">
+          {isIOS ? <Smartphone size={30} className="text-white" /> : <MonitorDown size={30} className="text-white" />}
         </div>
+        <h1 id="install-title" className="font-fredoka text-2xl font-700 text-navy">Install DAAN IITG to continue</h1>
+        <p className="mt-3 font-nunito text-sm leading-relaxed text-navy/70">This community portal is available as an app. Install it for the full experience, then open it from your home screen or app launcher.</p>
+
+        {deferredPrompt ? (
+          <button onClick={handleInstall} disabled={installRequested} className="btn-cartoon btn-coral mt-6 w-full disabled:opacity-60">
+            <Download size={17} /> {installRequested ? "Finishing installation…" : "Install App"}
+          </button>
+        ) : isIOS ? (
+          <p className="mt-6 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">In Safari, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then open DAAN IITG from your home screen.</p>
+        ) : (
+          <p className="mt-6 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">Use Chrome or Edge&apos;s install option from the address bar or browser menu, then reopen DAAN IITG as an app.</p>
+        )}
       </div>
     </div>
   );
