@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Download, MonitorDown, Smartphone } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -13,30 +13,35 @@ function isInstalled() {
     Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
+function subscribeToInstallState(onStoreChange: () => void) {
+  window.addEventListener("appinstalled", onStoreChange);
+  const mediaQuery = window.matchMedia("(display-mode: standalone)");
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => {
+    window.removeEventListener("appinstalled", onStoreChange);
+    mediaQuery.removeEventListener("change", onStoreChange);
+  };
+}
+
+function getInstallState() {
+  return isInstalled();
+}
+
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
   const [installRequested, setInstallRequested] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const installed = useSyncExternalStore(subscribeToInstallState, getInstallState, () => false);
+  const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
-    setInstalled(isInstalled());
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
-
     const handlePrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     };
-    const handleInstalled = () => {
-      setInstalled(true);
-      setDeferredPrompt(null);
-    };
 
     window.addEventListener("beforeinstallprompt", handlePrompt);
-    window.addEventListener("appinstalled", handleInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", handlePrompt);
-      window.removeEventListener("appinstalled", handleInstalled);
     };
   }, []);
 
