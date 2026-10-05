@@ -64,15 +64,14 @@ export default function PWAInstallPrompt() {
         <h1 id="install-title" className="font-fredoka text-2xl font-700 text-navy">Install DAAN IITG to continue</h1>
         <p className="mt-3 font-nunito text-sm leading-relaxed text-navy/70">This community portal is available as an app. Install it for the full experience, then open it from your home screen or app launcher.</p>
 
-        {deferredPrompt ? (
-          <button onClick={handleInstall} disabled={installRequested} className="btn-cartoon btn-coral mt-6 w-full disabled:opacity-60">
-            <Download size={17} /> {installRequested ? "Finishing installation…" : "Install App"}
-          </button>
-        ) : isIOS ? (
-          <p className="mt-6 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">In Safari, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then open DAAN IITG from your home screen.</p>
+        <button onClick={handleInstall} disabled={!deferredPrompt || installRequested} className="btn-cartoon btn-coral mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60">
+          <Download size={17} /> {installRequested ? "Finishing installation…" : "Install App"}
+        </button>
+        {!deferredPrompt && (isIOS ? (
+          <p className="mt-4 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">In Safari, tap <strong>Share</strong>, choose <strong>Add to Home Screen</strong>, then open DAAN IITG from your home screen.</p>
         ) : (
-          <p className="mt-6 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">Use Chrome or Edge&apos;s install option from the address bar or browser menu, then reopen DAAN IITG as an app.</p>
-        )}
+          <p className="mt-4 rounded-lg border-2 border-navy bg-cream p-3 font-nunito text-sm text-navy">The install option is loading. If it does not activate, use Chrome or Edge&apos;s install option from the address bar or browser menu.</p>
+        ))}
       </div>
     </div>
   );
