@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Upload, Trash2, Plus, Trophy, X } from "lucide-react";
+import { Upload, Trash2, Plus, Trophy, X, Pencil } from "lucide-react";
 import type { Achievement } from "@/lib/types";
-import { useRouter } from "next/navigation";
 import ImageCropper from "@/components/ImageCropper";
 
 interface Props {
@@ -16,6 +15,7 @@ interface Props {
 export default function AchievementsAdmin({ achievements: initial, isAdmin }: Props) {
   const [achievements, setAchievements] = useState(initial);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Achievement | null>(null);
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [description, setDescription] = useState("");
@@ -24,7 +24,17 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
-  const router = useRouter();
+
+  const resetForm = () => {
+    setEditing(null); setTitle(""); setCaption(""); setDescription("");
+    setFile(null); setPreview(null); setCropSrc(null); setShowForm(false);
+  };
+
+  const openEdit = (achievement: Achievement) => {
+    setEditing(achievement); setTitle(achievement.title); setCaption(achievement.caption || "");
+    setDescription(achievement.description || ""); setFile(null); setPreview(achievement.photo_url);
+    setShowForm(true);
+  };
 
   const handleFile = (f: File) => {
     setCropSrc(URL.createObjectURL(f));
@@ -35,7 +45,7 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
     if (!title) { toast.error("Title is required."); return; }
     setLoading(true);
 
-    let photo_url: string | null = null;
+    let photo_url: string | null = editing?.photo_url || null;
 
     if (file) {
       const ext = file.name.split(".").pop();
@@ -53,25 +63,20 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
     }
 
     const { data: user } = await supabase.auth.getUser();
-    const { data, error } = await supabase
-      .from("achievements")
-      .insert({ title, caption: caption || null, description: description || null, photo_url, created_by: user.user?.id })
-      .select()
-      .single();
+    const payload = { title, caption: caption || null, description: description || null, photo_url };
+    const query = editing
+      ? supabase.from("achievements").update(payload).eq("id", editing.id)
+      : supabase.from("achievements").insert({ ...payload, created_by: user.user?.id });
+    const { data, error } = await query.select().single();
 
     if (error) {
       toast.error("Failed to post achievement.");
     } else {
-      toast.success("Achievement posted!");
-      setAchievements((prev) => [data, ...prev]);
-      setShowForm(false);
-      setTitle(""); setCaption(""); setDescription(""); setFile(null); setPreview(null);
-      // Trigger push notification
-      fetch("/api/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "New Achievement!", body: data.title, url: "/achievements" }),
-      });
+      toast.success(editing ? "Achievement updated!" : "Achievement posted!");
+      setAchievements((prev) => editing ? prev.map((item) => item.id === data.id ? data : item) : [data, ...prev]);
+      const wasEditing = Boolean(editing);
+      resetForm();
+      if (!wasEditing) fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "New Achievement!", body: data.title, url: "/achievements" }) });
     }
     setLoading(false);
   };
@@ -83,14 +88,14 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
     if (!error) {
       setAchievements((prev) => prev.filter((a) => a.id !== id));
       toast.success("Deleted.");
-    }
+    } else toast.error("Could not delete this achievement.");
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-fredoka font-700 text-navy text-2xl">Achievements</h2>
-        <button onClick={() => setShowForm(true)} className="btn-cartoon btn-coral text-sm px-4 py-2">
+        <button onClick={resetForm} className="btn-cartoon btn-coral text-sm px-4 py-2">
           <Plus size={16} /> New Achievement
         </button>
       </div>
@@ -99,10 +104,10 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
       {showForm && (
         <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="card-cartoon bg-white w-full max-w-lg p-6 relative my-4">
-            <button onClick={() => setShowForm(false)} className="absolute top-4 right-4 text-navy/40 hover:text-navy">
+            <button onClick={resetForm} className="absolute top-4 right-4 text-navy/40 hover:text-navy">
               <X size={20} />
             </button>
-            <h3 className="font-fredoka font-700 text-navy text-xl mb-5">Post Achievement</h3>
+            <h3 className="font-fredoka font-700 text-navy text-xl mb-5">{editing ? "Edit Achievement" : "Post Achievement"}</h3>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="font-nunito font-600 text-sm text-navy mb-1 block">Title *</label>
@@ -137,7 +142,7 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
                 </label>
               </div>
               <button type="submit" disabled={loading} className="btn-cartoon btn-coral w-full mt-2 disabled:opacity-60">
-                {loading ? "Posting..." : "Post Achievement"}
+                {loading ? "Saving..." : editing ? "Save Changes" : "Post Achievement"}
               </button>
             </form>
           </div>
@@ -182,9 +187,10 @@ export default function AchievementsAdmin({ achievements: initial, isAdmin }: Pr
               <p className="font-nunito text-xs text-navy/40">{new Date(a.created_at).toLocaleDateString("en-IN")}</p>
             </div>
             {isAdmin && (
-              <button onClick={() => handleDelete(a.id)} className="btn-cartoon bg-white text-red-500 border-red-400 shadow-[2px_2px_0_#ef4444] text-sm px-3 py-1.5 flex-shrink-0">
-                <Trash2 size={14} />
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => openEdit(a)} aria-label={`Edit ${a.title}`} className="btn-cartoon btn-white text-sm px-3 py-1.5 flex-shrink-0"><Pencil size={14} /></button>
+                <button onClick={() => handleDelete(a.id)} aria-label={`Delete ${a.title}`} className="btn-cartoon bg-white text-red-500 border-red-400 shadow-[2px_2px_0_#ef4444] text-sm px-3 py-1.5 flex-shrink-0"><Trash2 size={14} /></button>
+              </div>
             )}
           </div>
         ))}
