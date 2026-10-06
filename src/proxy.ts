@@ -40,6 +40,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Installed apps launch at the root on older manifest versions. Send a
+  // signed-in member straight to their dashboard instead of the landing page.
+  if (user && pathname === "/") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   // Admin route protection
   if (pathname.startsWith("/admin")) {
     if (!user) {

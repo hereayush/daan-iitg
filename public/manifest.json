@@ -2,7 +2,7 @@
   "name": "DAAN IITG",
   "short_name": "DAAN IITG",
   "description": "Dakshana Alumni Network — IIT Guwahati. The official community platform for Dakshana Scholars.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#FEFAE0",
   "theme_color": "#FF6B35",

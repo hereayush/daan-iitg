@@ -1,5 +1,5 @@
 // DAAN IITG Service Worker
-const CACHE_NAME = "daan-iitg-v1";
+const CACHE_NAME = "daan-iitg-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
@@ -29,6 +29,10 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (event.request.url.includes("/api/")) return; // Don't cache API
+
+  // Never cache documents or Next.js route payloads: they may contain an
+  // authentication redirect from an earlier session.
+  if (event.request.mode === "navigate" || event.request.url.includes("/_next/")) return;
 
   event.respondWith(
     fetch(event.request)
