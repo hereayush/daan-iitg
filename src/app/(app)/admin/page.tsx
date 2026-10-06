@@ -84,7 +84,7 @@ export default async function AdminPage() {
               className="card-cartoon bg-white p-6 flex items-start gap-4 group"
             >
               <div className={`w-12 h-12 ${link.color} border-2 border-navy rounded-xl flex items-center justify-center flex-shrink-0 shadow-cartoon`}>
-                <Icon size={22} className="text-navy" />
+                <Icon size={22} className={link.href === "/admin/notifications" ? "text-white" : "text-navy"} />
               </div>
               <div>
                 <h3 className="font-fredoka font-600 text-navy text-lg group-hover:text-coral transition-colors">

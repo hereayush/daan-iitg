@@ -11,7 +11,7 @@ export default async function AdminAlumniPage() {
     supabase.from("alumni").select("*", { count: "exact", head: true }),
     supabase.from("alumni").select("*").order("batch", { ascending: false }).order("scholar_name"),
   ]);
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile || !["admin", "sub_admin"].includes(profile.role)) redirect("/dashboard");
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <AlumniUploadClient currentCount={count ?? 0} alumni={alumni || []} />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import * as XLSX from "xlsx";
 
 // Normalise a header: lower case, letters and digits only
@@ -111,14 +111,14 @@ function parseSheet(grid: unknown[][]): { recs: Rec[]; mode: "header" | "positio
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createServiceClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const supabase = await createServiceClient();
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || profile.role !== "admin") {
-    return NextResponse.json({ error: "Admin only" }, { status: 403 });
+  if (!profile || !["admin", "sub_admin"].includes(profile.role)) {
+    return NextResponse.json({ error: "Admin or sub-admin access required" }, { status: 403 });
   }
 
   const formData = await req.formData();

@@ -1,8 +1,26 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  let response = NextResponse.next({ request });
+
+  // Refresh auth tokens on every request and write the renewed cookie back to
+  // the response. Without this, installed apps lose their session on restart.
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
+      },
+    }
+  );
 
   // Public routes — no auth needed
   const publicRoutes = ["/", "/login", "/register", "/privacy", "/terms"];
@@ -10,7 +28,6 @@ export async function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith("/api/")
   );
 
-  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // Not logged in and trying to access protected route
@@ -39,7 +56,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export default proxy;
