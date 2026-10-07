@@ -40,9 +40,12 @@ export async function getCroppedImg(
     return null;
   }
 
-  // Set the size of the cropped canvas
-  croppedCanvas.width = pixelCrop.width;
-  croppedCanvas.height = pixelCrop.height;
+  // Keep uploads sharp while preventing very large camera images from being
+  // sent to storage. All existing crop flows use this helper.
+  const maxDimension = 1600;
+  const scale = Math.min(1, maxDimension / Math.max(pixelCrop.width, pixelCrop.height));
+  croppedCanvas.width = Math.max(1, Math.round(pixelCrop.width * scale));
+  croppedCanvas.height = Math.max(1, Math.round(pixelCrop.height * scale));
 
   // Draw the cropped image onto the new canvas
   croppedCtx.drawImage(
@@ -53,13 +56,11 @@ export async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height
+    croppedCanvas.width,
+    croppedCanvas.height
   );
 
   return new Promise((resolve) => {
-    croppedCanvas.toBlob((file) => {
-      resolve(file);
-    }, "image/jpeg");
+    croppedCanvas.toBlob((file) => resolve(file), "image/jpeg", 0.8);
   });
 }
