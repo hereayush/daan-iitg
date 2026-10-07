@@ -30,6 +30,7 @@ ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "members read posts" ON public.posts FOR SELECT TO authenticated USING (true);
 CREATE POLICY "members create posts" ON public.posts FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "members remove own posts" ON public.posts FOR DELETE TO authenticated USING (auth.uid() = user_id);
 CREATE POLICY "members read media" ON public.post_media FOR SELECT TO authenticated USING (true);
 CREATE POLICY "members read likes" ON public.post_likes FOR SELECT TO authenticated USING (true);
 CREATE POLICY "members like" ON public.post_likes FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);

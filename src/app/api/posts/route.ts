@@ -11,7 +11,21 @@ export async function GET() {
   const ids = [...new Set((posts || []).map((post) => post.user_id))];
   const { data: authors } = ids.length ? await db.from("profiles").select("id, full_name, avatar_url").in("id", ids) : { data: [] };
   const authorById = Object.fromEntries((authors || []).map((author) => [author.id, author]));
-  return NextResponse.json({ posts: (posts || []).map((post) => ({ ...post, author: authorById[post.user_id], liked: post.post_likes.some((like: { user_id: string }) => like.user_id === user.id), like_count: post.post_likes.length, comments: post.post_comments || [] })) });
+  return NextResponse.json({ currentUserId: user.id, posts: (posts || []).map((post) => ({ ...post, author: authorById[post.user_id], liked: post.post_likes.some((like: { user_id: string }) => like.user_id === user.id), like_count: post.post_likes.length, comments: post.post_comments || [] })) });
+}
+
+export async function DELETE(request: NextRequest) {
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const id = new URL(request.url).searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Post id is required." }, { status: 400 });
+  const db = await createServiceClient();
+  const { data: post } = await db.from("posts").select("user_id").eq("id", id).maybeSingle();
+  if (!post || post.user_id !== user.id) return NextResponse.json({ error: "You can only delete your own posts." }, { status: 403 });
+  const { error } = await db.from("posts").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }
 
 export async function POST(request: NextRequest) {
