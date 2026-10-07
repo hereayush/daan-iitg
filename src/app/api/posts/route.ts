@@ -48,5 +48,23 @@ export async function POST(request: NextRequest) {
     if (!uploadError) media.push({ post_id: post.id, url: db.storage.from("daan-media").getPublicUrl(path).data.publicUrl, display_order: index });
   }
   if (media.length) await db.from("post_media").insert(media);
+  // Notify existing push subscribers directly from this trusted server route.
+  // Post creation remains successful even if a subscription has expired.
+  const vapidEmail = process.env.VAPID_EMAIL;
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+  if (vapidEmail && vapidPublicKey && vapidPrivateKey) {
+    const webpush = (await import("web-push")).default;
+    webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
+    const { data: subscriptions } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth");
+    const sender = (await db.from("profiles").select("full_name").eq("id", user.id).maybeSingle()).data?.full_name || "A DAAN member";
+    const payload = JSON.stringify({ title: "New community post", body: caption || `${sender} shared photos with the community.`, url: "/posts" });
+    const expired: string[] = [];
+    await Promise.allSettled((subscriptions || []).map(async (subscription) => {
+      try { await webpush.sendNotification({ endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } }, payload); }
+      catch (error: unknown) { if (error && typeof error === "object" && "statusCode" in error && (error.statusCode === 404 || error.statusCode === 410)) expired.push(subscription.id); }
+    }));
+    if (expired.length) await db.from("push_subscriptions").delete().in("id", expired);
+  }
   return NextResponse.json({ success: true });
 }
