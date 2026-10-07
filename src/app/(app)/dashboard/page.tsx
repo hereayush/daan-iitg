@@ -12,6 +12,7 @@ import {
   Trophy,
   UsersRound,
   Zap,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const exploreLinks = [
@@ -46,9 +47,10 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  const [{ data: recentAchievements }, { data: upcomingEvents }] = await Promise.all([
+  const [{ data: recentAchievements }, { data: upcomingEvents }, { data: recentPosts }] = await Promise.all([
     supabase.from("achievements").select("id, title, caption, photo_url").order("created_at", { ascending: false }).limit(3),
     supabase.from("events").select("id, title, event_date, description").gte("event_date", new Date().toISOString().split("T")[0]).order("event_date", { ascending: true }).limit(3),
+    supabase.from("posts").select("id, caption, created_at, post_media(url, display_order)").order("created_at", { ascending: false }).limit(1),
   ]);
 
   const firstName = profile?.full_name?.split(" ")[0] || "Scholar";
@@ -136,6 +138,19 @@ export default async function DashboardPage() {
           ) : (
             <div className="rounded-xl border-2 border-dashed border-navy/35 bg-white/65 p-8 text-center"><Trophy size={30} className="mx-auto text-coral" /><p className="mt-3 font-fredoka text-lg font-semibold text-navy">The next win could be yours.</p><p className="mt-1 font-nunito text-sm text-navy/60">Community achievements will appear here.</p></div>
           )}
+
+          <div className="mt-10">
+            <SectionTitle eyebrow="Fresh from your feed" title="Community post" href="/posts" />
+            {recentPosts?.[0] ? (
+              <Link href="/posts" className="group relative block min-h-72 overflow-hidden rounded-2xl border-2 border-navy bg-navy shadow-cartoon transition-transform hover:-translate-y-1">
+                {recentPosts[0].post_media?.[0]?.url ? <img src={recentPosts[0].post_media[0].url} alt="Latest community post" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="absolute inset-0 bg-coral" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/35 to-transparent" />
+                <div className="relative flex min-h-72 flex-col justify-end p-6 text-white"><span className="mb-3 grid h-11 w-11 place-items-center rounded-xl border-2 border-navy bg-yellow text-navy shadow-cartoon"><ImageIcon size={20} /></span><p className="line-clamp-2 font-fredoka text-2xl font-bold leading-tight">{recentPosts[0].caption || "A new moment from the DAAN community."}</p><span className="mt-3 inline-flex items-center gap-2 font-fredoka text-sm font-semibold text-yellow">Open community posts <ArrowRight size={17} /></span></div>
+              </Link>
+            ) : (
+              <Link href="/posts" className="group block rounded-2xl border-2 border-navy bg-coral p-7 text-white shadow-cartoon transition-transform hover:-translate-y-1"><span className="grid h-12 w-12 place-items-center rounded-xl border-2 border-navy bg-yellow text-navy shadow-cartoon"><ImageIcon size={22} /></span><h3 className="mt-7 font-fredoka text-2xl font-bold">Share the next DAAN moment.</h3><p className="mt-2 font-nunito text-sm text-white/80">Post photos and updates for the community to see.</p><span className="mt-6 inline-flex items-center gap-2 font-fredoka font-semibold">Create a post <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></span></Link>
+            )}
+          </div>
         </div>
         <div>
           <SectionTitle eyebrow="Save the date" title="Upcoming events" href="/events" />
