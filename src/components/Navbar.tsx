@@ -10,6 +10,7 @@ import BrandLogo from "@/components/BrandLogo";
 
 const navLinks = [
   { href: "/dashboard", label: "Home" },
+  { href: "/posts", label: "Posts" },
   { href: "/achievements", label: "Achievements" },
   { href: "/alumni", label: "Alumni" },
   { href: "/council", label: "Council" },
