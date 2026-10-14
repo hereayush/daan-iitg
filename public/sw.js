@@ -1,5 +1,5 @@
 // DAAN IITG Service Worker
-const CACHE_NAME = "daan-iitg-v2";
+const CACHE_NAME = "daan-iitg-v3";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",

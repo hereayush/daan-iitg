@@ -12,8 +12,8 @@ export default function BrandLogo({
   return (
     <span className={`relative block shrink-0 overflow-hidden rounded-lg bg-white ${className}`}>
       <Image
-        src="/branding/dakshana-iitg-logo.png"
-        alt="Dakshana IIT Guwahati logo"
+        src="/branding/daan-iitg-badge.jpg"
+        alt="DAAN IITG logo"
         fill
         priority={priority}
         sizes="48px"
