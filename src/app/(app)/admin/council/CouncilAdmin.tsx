@@ -133,7 +133,7 @@ export default function CouncilAdmin({ members: initial, isAdmin }: Props) {
               {([["name","Name *","text"],["designation","Designation *","text"],["phone","Phone","tel"],["email","Email","email"],["linkedin_url","LinkedIn URL","url"]] as [string,string,string][]).map(([key,label,type]) => (
                 <div key={key}>
                   <label className="font-nunito font-600 text-sm text-navy mb-1 block">{label}</label>
-                  <input type={type} className="input-cartoon" value={(form as Record<string, string>)[key]}
+                  <input type={type} className="input-cartoon" value={(form as unknown as Record<string, string>)[key]}
                     onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
                 </div>
               ))}
