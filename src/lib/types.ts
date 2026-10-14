@@ -47,6 +47,8 @@ export interface CouncilMember {
   email: string | null;
   linkedin_url: string | null;
   display_order: number;
+  is_current: boolean;
+  batch_year: number | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
