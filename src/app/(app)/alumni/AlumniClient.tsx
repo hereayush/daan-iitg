@@ -9,17 +9,53 @@ interface Props {
   batches: string[];
 }
 
+
+// ---------------------------------------------------------------------------
+// COE normalisation — maps every known dirty variant to a canonical label.
+// Matching is always done on the normalised value so "JNV Banglore Urban" and
+// "JNV BENGALURU URBAN" both resolve to the same bucket.
+// ---------------------------------------------------------------------------
+const COE_ALIASES: Record<string, string> = {
+  // Dakshana Valley
+  "dakshana valley":          "Dakshana Valley",
+  "dakshana valley ":         "Dakshana Valley",
+  "dakshana valley.":         "Dakshana Valley",
+
+  // JNV Bengaluru Urban (every known spelling variant)
+  "jnv bengaluru urban":      "JNV Bengaluru Urban",
+  "jnv bangalore urban":      "JNV Bengaluru Urban",
+  "jnv banglore urban":       "JNV Bengaluru Urban",
+  "jnv bengaluru urban ":     "JNV Bengaluru Urban",
+  "jnv bu":                   "JNV Bengaluru Urban",
+
+  // Bare "Bangalore Urban" (no JNV prefix) — treat as same COE
+  "bangalore urban":          "JNV Bengaluru Urban",
+  "banglore urban":           "JNV Bengaluru Urban",
+
+  // COE (generic/unknown) — keep as-is but normalise case
+  "coe":                      "COE",
+};
+
+function normalizeCoe(raw: string | null): string | null {
+  if (!raw) return null;
+  const key = raw.trim().toLowerCase();
+  return COE_ALIASES[key] ?? raw.trim().replace(/\s+/g, " ");
+}
+// ---------------------------------------------------------------------------
+
 export default function AlumniClient({ alumni, batches }: Props) {
   const [search, setSearch] = useState("");
   const [selectedBatch, setSelectedBatch] = useState("all");
   const [selectedCoe, setSelectedCoe] = useState("all");
 
+  // Build a deduplicated, normalised COE list for the dropdown
   const coes = useMemo(() => {
-    const list: string[] = [];
+    const seen = new Set<string>();
     alumni.forEach((a) => {
-      if (a.coe && !list.includes(a.coe)) list.push(a.coe);
+      const norm = normalizeCoe(a.coe);
+      if (norm) seen.add(norm);
     });
-    return list.sort();
+    return [...seen].sort();
   }, [alumni]);
 
   const filtered = useMemo(() => {
@@ -32,7 +68,8 @@ export default function AlumniClient({ alumni, batches }: Props) {
         (a.parent_school && a.parent_school.toLowerCase().includes(q)) ||
         (a.email && a.email.toLowerCase().includes(q));
       const matchesBatch = selectedBatch === "all" || a.batch === selectedBatch;
-      const matchesCoe = selectedCoe === "all" || a.coe === selectedCoe;
+      // Compare on normalised COE so all variants match the selected canonical name
+      const matchesCoe = selectedCoe === "all" || normalizeCoe(a.coe) === selectedCoe;
       return matchesSearch && matchesBatch && matchesCoe;
     });
   }, [alumni, search, selectedBatch, selectedCoe]);
@@ -110,7 +147,7 @@ export default function AlumniClient({ alumni, batches }: Props) {
                 )}
                 {a.coe && (
                   <p className="font-nunito text-xs text-navy/70">
-                    <span className="font-700">COE:</span> {a.coe}
+                    <span className="font-700">COE:</span> {normalizeCoe(a.coe)}
                   </p>
                 )}
                 {a.parent_school && (
