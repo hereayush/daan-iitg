@@ -69,12 +69,12 @@ export const metadata: Metadata = {
   icons: {
     // Keep the browser-tab favicon distinct from the larger PWA icons, and
     // version its URL so browsers replace any previously cached tab icon.
-    shortcut: "/icons/icon-192.png?v=3",
+    shortcut: "/icons/icon-192.png?v=4",
     icon: [
-      { url: "/icons/icon-192.png?v=3", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png?v=3", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-192.png?v=4", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png?v=4", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/icons/apple-touch-icon.png?v=3" }],
+    apple: [{ url: "/icons/apple-touch-icon.png?v=4" }],
   },
 };
 
